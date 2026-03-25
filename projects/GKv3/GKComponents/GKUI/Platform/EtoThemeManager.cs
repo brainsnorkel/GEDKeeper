@@ -186,6 +186,8 @@ namespace GKUI.Themes
                 // FIXME: OS specifics
                 if (Application.Instance.Platform.IsGtk) {
                     themeFont = "Sans";
+                } else if (Application.Instance.Platform.IsMac) {
+                    themeFont = ".AppleSystemUIFont";
                 }
                 fCachedFont = new Font(themeFont, themeFontSize);
             }

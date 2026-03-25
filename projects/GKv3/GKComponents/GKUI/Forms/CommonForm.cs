@@ -83,7 +83,12 @@ namespace GKUI.Forms
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            ApplyTheme();
+            if (Application.Instance.Platform.IsMac) {
+                // Defer theme on macOS to avoid NSTabView tab label redraw artifacts
+                Application.Instance.AsyncInvoke(ApplyTheme);
+            } else {
+                ApplyTheme();
+            }
         }
 
         public virtual void ApplyTheme()
@@ -283,7 +288,11 @@ namespace GKUI.Forms
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            ApplyTheme();
+            if (Application.Instance.Platform.IsMac) {
+                Application.Instance.AsyncInvoke(ApplyTheme);
+            } else {
+                ApplyTheme();
+            }
         }
 
         protected override void OnShown(EventArgs e)
