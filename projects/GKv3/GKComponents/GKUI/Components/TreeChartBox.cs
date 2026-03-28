@@ -158,7 +158,7 @@ namespace GKUI.Components
 
         public TreeChartBox()
         {
-            BackgroundColor = Colors.White;
+            BackgroundColor = SystemColors.ControlBackground;
             fBackgroundImage = null;
 
             fModel = new TreeChartModel(this);

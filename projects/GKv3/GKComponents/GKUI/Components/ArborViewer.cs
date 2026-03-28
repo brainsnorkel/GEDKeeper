@@ -97,7 +97,7 @@ namespace GKUI.Components
 
         public ArborViewer()
         {
-            base.BackgroundColor = Colors.White;
+            base.BackgroundColor = SystemColors.ControlBackground;
 
             // repulsion - отталкивание, stiffness - тугоподвижность, friction - сила трения
             fSys = new ArborSystemEx(10000, 500/*1000*/, 0.1, this);
@@ -116,8 +116,8 @@ namespace GKUI.Components
             //fStrFormat.Alignment = StringAlignment.Center;
             //fStrFormat.LineAlignment = StringAlignment.Center;
 
-            fBlackBrush = new SolidBrush(Colors.Black);
-            fWhiteBrush = new SolidBrush(Colors.White);
+            fBlackBrush = new SolidBrush(SystemColors.ControlText);
+            fWhiteBrush = new SolidBrush(SystemColors.ControlBackground);
             fDragged = null;
             fNodesDragging = false;
         }
@@ -157,7 +157,8 @@ namespace GKUI.Components
                     gfx.DrawText(fDrawFont, fWhiteBrush, xnode.Box.Left, xnode.Box.Top, node.Sign);
                 }
 
-                using (Pen grayPen = new Pen(Colors.Gray, 1)) {
+                var edgeColor = Color.FromGrayscale(0.5f);
+                using (Pen edgePen = new Pen(edgeColor, 1)) {
                     foreach (ArborEdge edge in fSys.Edges) {
                         var srcNode = edge.Source as ArborNodeEx;
                         var tgtNode = edge.Target as ArborNodeEx;
@@ -169,7 +170,7 @@ namespace GKUI.Components
                         ArborPoint head = (tail.IsNull()) ? ArborPoint.Null : intersect_line_box(tail, pt2, tgtNode.Box);
 
                         if (!head.IsNull() && !tail.IsNull()) {
-                            EtoGfxRenderer.DrawArrowLine(gfx, Colors.Gray, grayPen, (float)tail.X, (float)tail.Y, (float)head.X, (float)head.Y);
+                            EtoGfxRenderer.DrawArrowLine(gfx, edgeColor, edgePen, (float)tail.X, (float)tail.Y, (float)head.X, (float)head.Y);
                         }
                     }
                 }

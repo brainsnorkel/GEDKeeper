@@ -174,9 +174,31 @@ namespace GKUI.Themes
             };
         }
 
+        /// <summary>
+        /// Creates a "System" theme where all colors derive from SystemColors.
+        /// This theme automatically adapts to OS Light/Dark mode changes.
+        /// </summary>
+        private static ThemeElementsDictionary CreateSystemThemeElements()
+        {
+            var elements = CreateDefaultThemeElements();
+
+            // Replace hardcoded colors with SystemColors equivalents
+            elements[ThemeElement.ButtonFace] = SystemColors.Control;
+            elements[ThemeElement.AccentButtonFace] = SystemColors.Control;
+            elements[ThemeElement.ButtonBorder] = SystemColors.ControlText;
+            elements[ThemeElement.Link] = SystemColors.Selection;
+            elements[ThemeElement.HighlightReadabilityRows] = SystemColors.ControlBackground;
+            elements[ThemeElement.HighlightUnparentedIndi] = SystemColors.ControlBackground;
+            elements[ThemeElement.HighlightUnmarriedIndi] = SystemColors.ControlBackground;
+            elements[ThemeElement.HighlightInaccessibleFiles] = SystemColors.ControlBackground;
+
+            return elements;
+        }
+
         public EtoThemeManager()
         {
             RegisterTheme(DefaultThemeName, CreateDefaultThemeElements(), true);
+            RegisterTheme("System", CreateSystemThemeElements(), true);
         }
 
         /// <summary>
@@ -187,6 +209,9 @@ namespace GKUI.Themes
         {
             fThemes.Remove(DefaultThemeName);
             RegisterTheme(DefaultThemeName, CreateDefaultThemeElements(), true);
+
+            fThemes.Remove("System");
+            RegisterTheme("System", CreateSystemThemeElements(), true);
         }
 
         private static Font fCachedFont = null;
