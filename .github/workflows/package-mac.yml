@@ -65,12 +65,21 @@ jobs:
     - name: Create DMGs
       run: |
         DMG_DIR="projects/GKv3/GEDKeeper3/bin/MacOS/Release"
+        echo "Build output contents:"
+        ls -la "$DMG_DIR/" || true
         for arch in osx-x64 osx-arm64; do
           suffix="${arch#osx-}"
-          hdiutil create "${DMG_DIR}/GEDKeeper3m-${suffix}.dmg" \
-            -ov -volname "GEDKeeper3m" -format UDZO -fs HFS+ \
-            -srcfolder "${DMG_DIR}/${arch}/GEDKeeper3.app"
+          APP_PATH="${DMG_DIR}/${arch}/GEDKeeper3.app"
+          if [ -d "$APP_PATH" ]; then
+            echo "Creating DMG for ${arch}..."
+            hdiutil create "${DMG_DIR}/GEDKeeper3m-${suffix}.dmg" \
+              -ov -volname "GEDKeeper3m" -format UDZO -fs HFS+ \
+              -srcfolder "$APP_PATH"
+          else
+            echo "Skipping ${arch}: $APP_PATH not found"
+          fi
         done
+        ls -la "$DMG_DIR/"*.dmg || echo "No DMGs created"
 
     - name: Sign app bundles
       if: github.event_name == 'push' && github.ref == 'refs/heads/master'
