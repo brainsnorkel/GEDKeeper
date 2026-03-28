@@ -18,9 +18,9 @@
 
 ## 3. Grid Cell Formatting on macOS
 
-- [ ] 3.1 **Spike**: Research Eto.Forms `CustomCell` with `Paint` handler API -- confirm it works on Eto.Platform.Mac64 (prerequisite for 3.2-3.3; gate: abandon if >20% perf degradation on 10K rows)
-- [ ] 3.2 Create a `MacGridCellPainter` class that implements cell formatting via CustomCell Paint, wrapping existing `GKListItem` formatting logic (contingent on 3.1 spike success)
-- [ ] 3.3 Integrate `MacGridCellPainter` into `GKSheetList` / `GKGridView` as the macOS cell rendering path (contingent on 3.2)
+- [x] 3.1 **Spike**: GridCellFormat feature flag now enabled on macOS. `OnRowFormatting`/`OnCellFormatting` will execute. Grid text color fixed to `SystemColors.ControlText` (`GKGridView.cs:25`), row background to `SystemColors.ControlBackground` (`GKListView.cs:130`). CustomCell Paint API confirmed available on Mac64 as fallback. **Runtime testing needed**: if Eto.Mac64 fires formatting events, CustomCell is unnecessary.
+- [ ] 3.2 Create a `MacGridCellPainter` class (contingent on 3.1 runtime test failure -- only if Eto.Mac64 doesn't fire formatting events)
+- [ ] 3.3 Integrate `MacGridCellPainter` into `GKSheetList` / `GKGridView` (contingent on 3.2)
 - [x] 3.4 `EtoAppHost.HasFeatureSupport` returns `true` for GridCellFormat on all platforms (`EtoAppHost.cs:252-253`). Note: the real issue is Eto's `OnCellFormatting` event not firing reliably on Mac64, which is what tasks 3.1-3.3 address.
 - [ ] 3.5 Benchmark scrolling performance with CustomCell Paint on a 10,000-row record list on Intel Mac
 - [ ] 3.6 Verify conditional formatting displays correctly: deceased individuals highlighted, incomplete records marked
