@@ -102,6 +102,8 @@
 
     <PropertyGroup Condition=" $(DefineConstants.Contains('OS_MACOS')) ">
         <AssemblyName>GEDKeeper3m</AssemblyName>
+        <DmgName>GEDKeeper3m</DmgName>
+        <DmgVolumeName>GEDKeeper3m</DmgVolumeName>
         <TargetFramework>net8.0</TargetFramework>
         <OutputType>exe</OutputType>
         <PublishTrimmed>false</PublishTrimmed>

@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Init
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
     - name: .NET SDK check
@@ -30,7 +30,7 @@ jobs:
     - name: Package
       run: rpmbuild --build-in-place -bb deploy/rpm/gedkeeper-github.spec
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: gedkeeper3-rpm
         path: ~/rpmbuild/RPMS/x86_64/*.rpm
