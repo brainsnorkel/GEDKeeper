@@ -72,6 +72,10 @@ namespace GKUI.Platform
         {
             await base.Init(args, isMDI);
 
+#if OS_MACOS
+            StartAppearanceObserver();
+#endif
+
             // EtoForms: Terminating is not called when the last or only one form is closed
             // if MainForm is not set in the SDI interface (picoe/Eto#2794).
             // That's why ApplicationExit() is called from CloseDependentWindows(),
@@ -246,11 +250,7 @@ namespace GKUI.Platform
 
             switch (feature) {
                 case Feature.GridCellFormat:
-#if OS_MACOS
-                    result = false;
-#else
                     result = true;
-#endif
                     break;
 
                 case Feature.InternetProxy:
@@ -434,6 +434,39 @@ namespace GKUI.Platform
                 clipboard.Image = etoImage;
             }
         }
+
+#if OS_MACOS
+        private int fLastAppearanceHash;
+        private UITimer fAppearanceTimer;
+
+        private void StartAppearanceObserver()
+        {
+            fLastAppearanceHash = SystemColors.WindowBackground.ToArgb() ^ SystemColors.ControlText.ToArgb();
+
+            fAppearanceTimer = new UITimer { Interval = 2.0 };
+            fAppearanceTimer.Elapsed += (s, e) => {
+                int currentHash = SystemColors.WindowBackground.ToArgb() ^ SystemColors.ControlText.ToArgb();
+                if (currentHash != fLastAppearanceHash) {
+                    fLastAppearanceHash = currentHash;
+                    OnSystemAppearanceChanged();
+                }
+            };
+            fAppearanceTimer.Start();
+        }
+
+        private void OnSystemAppearanceChanged()
+        {
+            var themeManager = ThemeManager as EtoThemeManager;
+            if (themeManager == null) return;
+
+            themeManager.RefreshDefaultTheme();
+
+            var currentTheme = GlobalOptions.Instance.Theme;
+            if (!string.IsNullOrEmpty(currentTheme)) {
+                ApplyTheme(currentTheme);
+            }
+        }
+#endif
 
         #region Bootstrapper
 

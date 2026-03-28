@@ -255,11 +255,9 @@ namespace GKUI.Components
         protected override void OnShown(EventArgs e)
         {
             if (Loaded) {
-                try {
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
                     fViewport = UIHelper.Rt2Rt(VisibleRect);
                     UpdateProperties();
-                } catch {
-                    // FIXME: works in MacOS and doesn't work in Wpf
                 }
             }
 

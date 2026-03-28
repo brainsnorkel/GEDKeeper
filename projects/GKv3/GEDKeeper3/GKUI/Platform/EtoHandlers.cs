@@ -1,5 +1,6 @@
 ﻿#pragma warning disable CA1416
 
+using System.Collections.Generic;
 using Eto.Drawing;
 
 #if OS_MSWIN
@@ -279,13 +280,66 @@ namespace GKUI.Platform
 
     public class GKFontHandler : FontHandler, Font.IHandler
     {
+        private static readonly Dictionary<string, int> fFontRefCounts = new Dictionary<string, int>();
+        private static readonly object fLock = new object();
+        private string fFontKey;
+
+        private string GetFontKey()
+        {
+            if (fFontKey == null) {
+                try {
+                    var widget = Widget;
+                    if (widget != null) {
+                        fFontKey = $"{widget.FamilyName}|{widget.Size:F1}|{widget.FontStyle}";
+                    }
+                } catch {
+                    // Widget may not be initialized yet
+                }
+            }
+            return fFontKey;
+        }
+
+        internal static void AddRef(Font font)
+        {
+            if (font == null) return;
+            string key = $"{font.FamilyName}|{font.Size:F1}|{font.FontStyle}";
+            lock (fLock) {
+                fFontRefCounts.TryGetValue(key, out int count);
+                fFontRefCounts[key] = count + 1;
+            }
+        }
+
+        internal static void Release(Font font)
+        {
+            if (font == null) return;
+            string key = $"{font.FamilyName}|{font.Size:F1}|{font.FontStyle}";
+            lock (fLock) {
+                if (fFontRefCounts.TryGetValue(key, out int count)) {
+                    if (count <= 1) {
+                        fFontRefCounts.Remove(key);
+                    } else {
+                        fFontRefCounts[key] = count - 1;
+                    }
+                }
+            }
+        }
+
         /// <remarks>
         /// When Font is disposed it disposes underlying handler, which in turn disposes system NSFont.
         /// This renders all fonts using the same font family to become unusable.
+        /// Only allow disposal when no other controls reference the same font family+size+style.
         /// </remarks>
         protected override bool DisposeControl
         {
-            get { return false; }
+            get {
+                string key = GetFontKey();
+                if (key == null) return false;
+
+                lock (fLock) {
+                    fFontRefCounts.TryGetValue(key, out int count);
+                    return count <= 0;
+                }
+            }
         }
     }
 
@@ -293,19 +347,19 @@ namespace GKUI.Platform
     {
         public Color BackgroundColor
         {
-            get { return Colors.Transparent; }
+            get { return SystemColors.Control; }
             set { }
         }
 
         public Font Font
         {
-            get { return null; }
+            get { return SystemFonts.Default(); }
             set { }
         }
 
         public Color TextColor
         {
-            get { return Colors.Transparent; }
+            get { return SystemColors.ControlText; }
             set { }
         }
     }
@@ -315,7 +369,7 @@ namespace GKUI.Platform
     {
         public Font Font
         {
-            get { return null; }
+            get { return SystemFonts.Default(); }
             set { }
         }
     }
@@ -325,19 +379,19 @@ namespace GKUI.Platform
     {
         public Color BackgroundColor
         {
-            get { return Colors.Transparent; }
+            get { return SystemColors.Control; }
             set { }
         }
 
         public Font Font
         {
-            get { return null; }
+            get { return SystemFonts.Default(); }
             set { }
         }
 
         public Color TextColor
         {
-            get { return Colors.Transparent; }
+            get { return SystemColors.ControlText; }
             set { }
         }
     }
@@ -347,7 +401,7 @@ namespace GKUI.Platform
     {
         public Font Font
         {
-            get { return null; }
+            get { return SystemFonts.Default(); }
             set { }
         }
     }

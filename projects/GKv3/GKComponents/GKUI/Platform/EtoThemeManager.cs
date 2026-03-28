@@ -30,12 +30,21 @@ namespace GKUI.Themes
             RegisterControlHandlers();
         }
 
-        public EtoThemeManager()
+        private static string GetDefaultFontFamily()
         {
-            RegisterTheme(DefaultThemeName, new ThemeElementsDictionary() {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return ".AppleSystemUIFont";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                return "sans-serif";
+            return "Tahoma";
+        }
+
+        private static ThemeElementsDictionary CreateDefaultThemeElements()
+        {
+            return new ThemeElementsDictionary() {
                 { ThemeElement.None, "" },
 
-                { ThemeElement.Font, "Tahoma" },
+                { ThemeElement.Font, GetDefaultFontFamily() },
                 { ThemeElement.FontSize, 9.0f },
 
                 { ThemeElement.Editor, SystemColors.ControlBackground },
@@ -162,7 +171,22 @@ namespace GKUI.Themes
                 { ThemeElement.Glyph_FindAndReplace, "" },
                 { ThemeElement.Glyph_View, "Resources.btn_view.png" },
                 { ThemeElement.Glyph_Tools, "Resources.btn_tools.gif" },
-            }, true);
+            };
+        }
+
+        public EtoThemeManager()
+        {
+            RegisterTheme(DefaultThemeName, CreateDefaultThemeElements(), true);
+        }
+
+        /// <summary>
+        /// Re-registers the default theme with current SystemColors values.
+        /// Used when macOS appearance changes between Light and Dark mode.
+        /// </summary>
+        public void RefreshDefaultTheme()
+        {
+            fThemes.Remove(DefaultThemeName);
+            RegisterTheme(DefaultThemeName, CreateDefaultThemeElements(), true);
         }
 
         private static Font fCachedFont = null;
@@ -472,7 +496,9 @@ namespace GKUI.Themes
             if (component is GKTabControl gkTab) {
                 // extended
                 if (fCachedFont != null) gkTab.Font = fCachedFont;
-                gkTab.BackgroundColor = GetThemeColor(theme, ThemeElement.Control);
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+                    gkTab.BackgroundColor = GetThemeColor(theme, ThemeElement.Control);
+                }
                 //ctl.TextColor = GetThemeColor(theme, ThemeElement.ControlText);
 
                 /*
@@ -485,7 +511,9 @@ namespace GKUI.Themes
                 // standard
                 var ctl = (TabControl)component;
                 //if (fCachedFont != null) ctl.Font = fCachedFont;
-                ctl.BackgroundColor = GetThemeColor(theme, ThemeElement.Control);
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+                    ctl.BackgroundColor = GetThemeColor(theme, ThemeElement.Control);
+                }
                 //ctl.TextColor = GetThemeColor(theme, ThemeElement.ControlText);
             }
         }
@@ -496,7 +524,9 @@ namespace GKUI.Themes
 
             var ctl = (TabPage)component;
             //if (fCachedFont != null) ctl.Font = fCachedFont;
-            ctl.BackgroundColor = GetThemeColor(theme, ThemeElement.TabHighlight);
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+                ctl.BackgroundColor = GetThemeColor(theme, ThemeElement.TabHighlight);
+            }
             //ctl.TextColor = GetThemeColor(theme, ThemeElement.ControlText);
         }
 

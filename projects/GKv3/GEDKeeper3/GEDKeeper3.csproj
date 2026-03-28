@@ -106,6 +106,7 @@
         <PublishTrimmed>false</PublishTrimmed>
         <MacSelfContained>true</MacSelfContained>
         <RuntimeIdentifiers>osx-x64;osx-arm64</RuntimeIdentifiers>
+        <SupportedOSPlatformVersion>10.15</SupportedOSPlatformVersion>
     </PropertyGroup>
 
     <ItemGroup Condition=" $(DefineConstants.Contains('OS_MACOS')) ">
