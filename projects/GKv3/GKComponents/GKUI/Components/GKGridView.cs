@@ -22,7 +22,7 @@ namespace GKUI.Components
 
         public GKGridView()
         {
-            TextColor = Colors.Black;
+            TextColor = SystemColors.ControlText;
         }
 
         protected override void OnCellFormatting(GridCellFormatEventArgs e)

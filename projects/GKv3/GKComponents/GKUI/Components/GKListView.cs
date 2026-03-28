@@ -127,7 +127,7 @@ namespace GKUI.Components
         }
 
         private int fRowFormatting = -1;
-        private Color fRowBackColor = Colors.White;
+        private Color fRowBackColor = SystemColors.ControlBackground;
 
         protected override void OnRowFormatting(GridRowFormatEventArgs e)
         {
