@@ -31,6 +31,11 @@ jobs:
         APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
         APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
       run: |
+        if [ -z "$APPLE_CERTIFICATE" ]; then
+          echo "No signing certificate configured, skipping"
+          exit 0
+        fi
+
         # Create a temporary keychain
         KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
         KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
@@ -72,6 +77,10 @@ jobs:
       env:
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       run: |
+        if [ -z "$APPLE_TEAM_ID" ]; then
+          echo "No signing identity configured, skipping"
+          exit 0
+        fi
         IDENTITY="Developer ID Application: ($APPLE_TEAM_ID)"
         DMG_DIR="projects/GKv3/GEDKeeper3/bin/MacOS/Release"
 
@@ -100,6 +109,10 @@ jobs:
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
       run: |
+        if [ -z "$APPLE_ID" ] || [ -z "$APPLE_APP_PASSWORD" ]; then
+          echo "No notarization credentials configured, skipping"
+          exit 0
+        fi
         DMG_DIR="projects/GKv3/GEDKeeper3/bin/MacOS/Release"
 
         find "$DMG_DIR" -name "*.dmg" | while read -r dmg; do
