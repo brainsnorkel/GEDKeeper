@@ -28,12 +28,12 @@
 ## 4. Dark Mode Support
 
 - [x] 4.1 Add appearance change observation via SystemColors polling timer (`EtoAppHost.cs:440-454` -- 2s interval, hash-based detection)
-- [ ] 4.2 Create a "System" theme entry in the theme system that derives all colors from `Eto.Drawing.SystemColors`
+- [x] 4.2 Create "System" theme with all colors from SystemColors (`EtoThemeManager.cs:CreateSystemThemeElements()` -- replaces 8 hardcoded colors with SystemColors equivalents)
 - [x] 4.3 Wire appearance change notification to trigger theme refresh via `RefreshDefaultTheme()` + `ApplyTheme()` (`EtoAppHost.cs:456-466`)
-- [ ] 4.4 Update `ChartRenderer` color constants to support dynamic light/dark values -- add contrast-aware defaults for chart backgrounds, lines, text, and selection highlights
-- [ ] 4.5 Update `TreeChartBox` rendering to use theme-aware colors for person boxes, connecting lines, and text labels
-- [ ] 4.6 Update `CircleChart` rendering to use theme-aware colors for segments, boundaries, and labels
-- [ ] 4.7 Update `ArborViewer` rendering for Dark Mode compatibility
+- [ ] 4.4 Update `ChartRenderer` color constants -- base class has no hardcoded colors (no action needed); GKCore chart models use GKColors constants (out of scope per guardrails)
+- [x] 4.5 Update `TreeChartBox` background to `SystemColors.ControlBackground` (`TreeChartBox.cs:161`). Printer backgrounds kept as `Colors.White` (paper).
+- [ ] 4.6 Update `CircleChart` -- uses `fModel.Options.BrushColor[]` from options (already theme-aware). Printer `Colors.White` is correct. Deferred: deeper color changes require GKCore CircleChartOptions changes.
+- [x] 4.7 Update `ArborViewer` background, text brushes, and edge colors to use SystemColors (`ArborViewer.cs:100,119-120,160-172`)
 - [ ] 4.8 Test Dark Mode: switch system appearance while app is running, verify all windows and charts update within 1 second
 - [ ] 4.9 Test custom theme override: verify non-System themes are unaffected by system appearance changes
 
