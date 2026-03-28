@@ -19,13 +19,108 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+
+    - name: Import signing certificate
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      env:
+        APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+        APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      run: |
+        # Create a temporary keychain
+        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+        KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+
+        security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+        security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+        # Import certificate
+        CERT_PATH=$RUNNER_TEMP/certificate.p12
+        echo "$APPLE_CERTIFICATE" | base64 --decode > "$CERT_PATH"
+        security import "$CERT_PATH" -P "$APPLE_CERTIFICATE_PASSWORD" \
+          -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+        rm "$CERT_PATH"
+
+        # Allow codesign to access the keychain
+        security set-key-partition-list -S apple-tool:,apple: \
+          -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+        security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain
+
+        echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> $GITHUB_ENV
+
     - name: Build
-      run: dotnet build GEDKeeper3.sln -c=Release -p:Platform=MacOS -p:EnableDmgBuild=true
+      run: dotnet build GEDKeeper3.sln -c=Release -p:Platform=MacOS -p:MacBuildBundle=true
       working-directory: projects/GKv3
+
+    - name: Create DMGs
+      run: |
+        DMG_DIR="projects/GKv3/GEDKeeper3/bin/MacOS/Release"
+        for arch in osx-x64 osx-arm64; do
+          suffix="${arch#osx-}"
+          hdiutil create "${DMG_DIR}/GEDKeeper3m-${suffix}.dmg" \
+            -ov -volname "GEDKeeper3m" -format UDZO -fs HFS+ \
+            -srcfolder "${DMG_DIR}/${arch}/GEDKeeper3.app"
+        done
+
+    - name: Sign app bundles
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      env:
+        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      run: |
+        IDENTITY="Developer ID Application: ($APPLE_TEAM_ID)"
+        DMG_DIR="projects/GKv3/GEDKeeper3/bin/MacOS/Release"
+
+        # Find and sign all .app bundles
+        find "$DMG_DIR" -name "*.app" -type d | while read -r app; do
+          echo "Signing nested binaries in $app ..."
+          find "$app" -name "*.dylib" -o -name "*.framework" | while read -r item; do
+            codesign --force --options runtime --timestamp --sign "$IDENTITY" "$item"
+          done
+
+          echo "Signing $app ..."
+          codesign --deep --force --options runtime --timestamp --sign "$IDENTITY" "$app"
+          codesign --verify --deep --strict "$app"
+        done
+
+        # Sign DMG files
+        find "$DMG_DIR" -name "*.dmg" | while read -r dmg; do
+          echo "Signing $dmg ..."
+          codesign --force --timestamp --sign "$IDENTITY" "$dmg"
+        done
+
+    - name: Notarize DMGs
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      env:
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+      run: |
+        DMG_DIR="projects/GKv3/GEDKeeper3/bin/MacOS/Release"
+
+        find "$DMG_DIR" -name "*.dmg" | while read -r dmg; do
+          echo "Notarizing $dmg ..."
+          xcrun notarytool submit "$dmg" \
+            --apple-id "$APPLE_ID" \
+            --team-id "$APPLE_TEAM_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --wait
+
+          echo "Stapling $dmg ..."
+          xcrun stapler staple "$dmg"
+        done
+
+    - name: Cleanup keychain
+      if: always()
+      run: |
+        if [ -n "$KEYCHAIN_PATH" ] && [ -f "$KEYCHAIN_PATH" ]; then
+          security delete-keychain "$KEYCHAIN_PATH"
+        fi
+
     - name: Upload DMG file
       uses: actions/upload-artifact@v4
       with:
