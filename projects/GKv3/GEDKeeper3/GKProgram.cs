@@ -13,7 +13,11 @@ using GKCore;
 using GKCore.Utilities;
 using GKUI.Platform;
 
+#if OS_MACOS
+[assembly: AssemblyTitle("GEDKeeper3m")]
+#else
 [assembly: AssemblyTitle("GEDKeeper3")]
+#endif
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyProduct(GKData.APP_TITLE)]
 [assembly: AssemblyCopyright(GKData.APP_COPYRIGHT)]

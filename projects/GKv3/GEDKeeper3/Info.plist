@@ -9,9 +9,9 @@
     <key>CFBundleIdentifier</key>
     <string>net.sourceforge.gedkeeper</string>
     <key>CFBundleName</key>
-    <string>GEDKeeper</string>
+    <string>GEDKeeper3m</string>
     <key>CFBundleDisplayName</key>
-    <string>GEDKeeper</string>
+    <string>GEDKeeper3m</string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>CFBundleDocumentTypes</key>

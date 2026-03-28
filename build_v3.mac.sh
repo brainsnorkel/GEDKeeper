@@ -7,6 +7,6 @@ dotnet build projects/GKv3/GEDKeeper3.sln -p:Configuration=Debug -p:Platform="Ma
 
 # sudo apt install mkisofs
 cd projects/GKv3/GEDKeeper3/bin/MacOS_Debug
-mkisofs -V GEDKeeper -D -R -apple -no-pad -o GEDKeeper3-x64.dmg osx-x64
-mkisofs -V GEDKeeper -D -R -apple -no-pad -o GEDKeeper3-arm64.dmg osx-arm64
+mkisofs -V GEDKeeper3m -D -R -apple -no-pad -o GEDKeeper3m-x64.dmg osx-x64
+mkisofs -V GEDKeeper3m -D -R -apple -no-pad -o GEDKeeper3m-arm64.dmg osx-arm64
 cd -

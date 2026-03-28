@@ -1,4 +1,4 @@
-name: Package GEDKeeper3 for MacOS
+name: Package GEDKeeper3m for MacOS
 
 on:
   push:
@@ -29,6 +29,6 @@ jobs:
     - name: Upload DMG file
       uses: actions/upload-artifact@v4
       with:
-        name: GEDKeeper3
+        name: GEDKeeper3m
         path: projects/GKv3/GEDKeeper3/bin/MacOS/Release/*.dmg
         if-no-files-found: error

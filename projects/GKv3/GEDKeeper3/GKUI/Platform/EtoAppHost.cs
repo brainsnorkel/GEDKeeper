@@ -45,7 +45,7 @@ namespace GKUI.Platform
     {
         static EtoAppHost()
         {
-            SetAppSign("GEDKeeper3e");
+            SetAppSign("GEDKeeper3m");
         }
 
         public EtoAppHost()
